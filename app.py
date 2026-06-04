@@ -11,6 +11,19 @@ from engine.memory.engine import update as memory_update, get_insights as memory
 from engine.coach.adjuster import get_adjustments
 
 
+def _seed_skills():
+    """Seed predefined skills if table is empty."""
+    skills = [
+        {'name': 'Python', 'description': '从零开始学习 Python 编程，掌握基础语法到项目实战', 'icon': '🐍', 'category': '编程'},
+        {'name': '英语', 'description': '系统提升英语能力，从基础到流利表达', 'icon': '🌍', 'category': '语言'},
+        {'name': '摄影', 'description': '掌握摄影技巧，用镜头记录美好瞬间', 'icon': '📷', 'category': '兴趣'},
+        {'name': '写作', 'description': '提升写作能力，清晰表达思想与观点', 'icon': '✍️', 'category': '表达'},
+    ]
+    for s in skills:
+        db.session.add(Skill(**s))
+    db.session.commit()
+
+
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
@@ -19,6 +32,10 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        # Auto-seed skills if table is empty
+        if not Skill.query.first():
+            _seed_skills()
+            print('[Seed] Initialized 4 skills')
         # Auto-cleanup expired cache on startup
         from engine.content.cache import cleanup_expired_cache
         cleaned = cleanup_expired_cache()
