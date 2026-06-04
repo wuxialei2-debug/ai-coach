@@ -1,0 +1,452 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Profile Header -->
+<div class="profile-card">
+  <div class="profile-avatar">🧑</div>
+  <div class="profile-info">
+    <div class="profile-name">{{ goal.skill.name ~ ' · 学习者' if goal else '学习者' }}</div>
+    <div class="profile-since">
+      {% if goal %}
+        {{ goal.level }} · 每天{{ goal.daily_minutes }}分钟
+      {% else %}
+        加入于 2026 年
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+{% if not goal %}
+<!-- No goal state -->
+<div class="portrait-empty">
+  <div class="empty-state">
+    <div class="empty-icon">🎯</div>
+    <p class="empty-text">还没有成长目标</p>
+    <p class="empty-hint">设定成长目标后，AI 将为你生成成长画像</p>
+    <a href="/wizard" class="btn btn-primary">添加成长目标</a>
+  </div>
+</div>
+{% else %}
+<!-- Portrait Content -->
+<div id="portrait-loading" class="portrait-loading">
+  <div class="portrait-spinner"></div>
+  <p>正在加载成长画像...</p>
+</div>
+
+<div id="portrait-error" class="portrait-empty" style="display:none">
+  <div class="empty-state">
+    <div class="empty-icon">⚠️</div>
+    <p class="empty-text">加载失败</p>
+    <p class="empty-hint">无法获取成长画像数据，请稍后重试</p>
+    <button class="btn btn-primary" onclick="location.reload()">重新加载</button>
+  </div>
+</div>
+
+<div id="portrait-content" style="display:none"></div>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+{% if goal %}
+<script>
+(function() {
+  const goalId = {{ goal.id }};
+
+  async function loadPortrait() {
+    const loading = document.getElementById('portrait-loading');
+    const errorDiv = document.getElementById('portrait-error');
+    const container = document.getElementById('portrait-content');
+
+    try {
+      const resp = await fetch('/api/goals/' + goalId + '/insights');
+      const data = await resp.json();
+
+      if (!data.ok) {
+        showError(loading, errorDiv);
+        return;
+      }
+
+      const insights = data.insights;
+      const allEmpty = Object.values(insights).every(function(i) {
+        return i.confidence === 0;
+      });
+
+      loading.style.display = 'none';
+
+      if (allEmpty) {
+        showInsufficientData(container);
+      } else {
+        renderAll(container, insights);
+      }
+    } catch (err) {
+      showError(loading, errorDiv);
+    }
+  }
+
+  function showError(loading, errorDiv) {
+    loading.style.display = 'none';
+    errorDiv.style.display = 'block';
+  }
+
+  function showInsufficientData(container) {
+    container.style.display = 'block';
+    container.innerHTML =
+      '<div class="empty-state">' +
+        '<div class="empty-icon">📊</div>' +
+        '<p class="empty-text">数据还在积累中</p>' +
+        '<p class="empty-hint">继续学习后将生成更准确的成长画像</p>' +
+      '</div>';
+  }
+
+  function renderAll(container, insights) {
+    container.style.display = 'block';
+    var html = '';
+
+    // Card 1: 执行力
+    html += renderExecution(insights);
+    // Card 2: 成长趋势
+    html += renderGrowthTrend(insights);
+    // Card 3: 学习偏好
+    html += renderPreferences(insights);
+    // Card 4: 学习习惯
+    html += renderHabits(insights);
+    // Card 4.5: 学习资源偏好
+    html += renderResourcePreference(insights);
+    // Card 5: 推荐节奏
+    html += renderPace(insights);
+    // Card 6: 完成概率
+    html += renderProbability(insights);
+
+    // Card 7: AI策略 (will be filled by fetchAdjustments)
+    html += '<div id="ai-strategy-card"><div class="portrait-card"><div class="portrait-card-title">AI 当前策略</div><div class="portrait-loading" style="padding:16px 0"><div class="portrait-spinner"></div></div></div></div>';
+
+    container.innerHTML = html;
+
+    // Fetch adjustments asynchronously
+    fetchAdjustments();
+  }
+
+  // ── Helpers ──
+
+  function confidenceBanner(confidence) {
+    if (confidence < 0.5) {
+      return (
+        '<div class="conf-banner">' +
+          '<div class="conf-banner-text">当前画像准确度较低，随着更多学习记录，分析结果会持续更新</div>' +
+        '</div>'
+      );
+    }
+    return '';
+  }
+
+  function pct(v) {
+    return Math.round((v || 0) * 100) + '%';
+  }
+
+  function hourPeriod(h) {
+    if (h == null) return '--';
+    if (h < 6) return '凌晨';
+    if (h < 12) return '上午';
+    if (h < 14) return '中午';
+    if (h < 18) return '下午';
+    return '晚上';
+  }
+
+  function hourRange(h) {
+    if (h == null) return '--';
+    var start = h.toString().padStart(2, '0') + ':00';
+    var end = (h + 2).toString().padStart(2, '0') + ':00';
+    return start + '-' + end;
+  }
+
+  // ── Card Renderers ──
+
+  function renderExecution(insights) {
+    var gp = insights.growth_profile || {};
+    var exec = insights.execution || {};
+    var data = gp.data || {};
+    var execData = exec.data || {};
+    var conf = gp.confidence || 0;
+
+    var level = data.execution_level || '--';
+    var rate = data.average_completion_rate || execData.average_completion_rate || 0;
+    var streak = data.current_streak || 0;
+    var maxStreak = data.max_streak || 0;
+
+    return (
+      '<div class="portrait-card">' +
+        confidenceBanner(conf) +
+        '<div class="portrait-card-title">执行力</div>' +
+        '<div class="exec-level">' + level + '</div>' +
+        '<div class="exec-stats">' +
+          '<div class="exec-stat">' +
+            '<span class="exec-stat-value">' + pct(rate) + '</span>' +
+            '<span class="exec-stat-label">完成率</span>' +
+          '</div>' +
+          '<div class="exec-stat">' +
+            '<span class="exec-stat-value">' + streak + '天</span>' +
+            '<span class="exec-stat-label">当前连续</span>' +
+          '</div>' +
+          '<div class="exec-stat">' +
+            '<span class="exec-stat-value">' + maxStreak + '天</span>' +
+            '<span class="exec-stat-label">历史最长</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderGrowthTrend(insights) {
+    var gp = insights.growth_profile || {};
+    var data = gp.data || {};
+    var conf = gp.confidence || 0;
+
+    var trend = data.growth_trend || '--';
+    var trendIcon = '';
+    if (trend === '持续进步') trendIcon = ' 📈';
+    else if (trend === '保持稳定') trendIcon = ' ➡️';
+    else if (trend === '需要关注') trendIcon = ' ⚠️';
+
+    return (
+      '<div class="portrait-card">' +
+        confidenceBanner(conf) +
+        '<div class="portrait-card-title">成长趋势</div>' +
+        '<div class="trend-value">' + trend + trendIcon + '</div>' +
+        '<div class="trend-sub">基于近期学习表现的综合评估</div>' +
+      '</div>'
+    );
+  }
+
+  function renderPreferences(insights) {
+    var pref = insights.preferences || {};
+    var data = pref.data || {};
+    var conf = pref.confidence || 0;
+
+    var diff = data.preferred_difficulty || '--';
+    var rate = data.task_completion_rate || 0;
+    var duration = data.preferred_duration_minutes;
+    var doneCount = data.done_count || 0;
+    var skippedCount = data.skipped_count || 0;
+
+    var durationText = duration ? duration + '分钟' : '--';
+
+    return (
+      '<div class="portrait-card">' +
+        confidenceBanner(conf) +
+        '<div class="portrait-card-title">学习偏好</div>' +
+        '<div class="pref-grid">' +
+          '<div class="pref-item">' +
+            '<span class="pref-label">偏好难度</span>' +
+            '<span class="pref-value">' + diff + '</span>' +
+          '</div>' +
+          '<div class="pref-item">' +
+            '<span class="pref-label">任务完成率</span>' +
+            '<span class="pref-value">' + pct(rate) + '</span>' +
+          '</div>' +
+          '<div class="pref-item">' +
+            '<span class="pref-label">偏好时长</span>' +
+            '<span class="pref-value">' + durationText + '</span>' +
+          '</div>' +
+          '<div class="pref-item">' +
+            '<span class="pref-label">已完成/已跳过</span>' +
+            '<span class="pref-value">' + doneCount + '/' + skippedCount + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderHabits(insights) {
+    var habits = insights.habits || {};
+    var data = habits.data || {};
+    var conf = habits.confidence || 0;
+
+    var bestHour = data.best_hour;
+    var avgDuration = data.average_duration_minutes || 0;
+    var freq = data.learning_frequency || 0;
+
+    return (
+      '<div class="portrait-card">' +
+        confidenceBanner(conf) +
+        '<div class="portrait-card-title">学习习惯</div>' +
+        '<div class="habit-grid">' +
+          '<div class="habit-item">' +
+            '<span class="habit-label">常用时间</span>' +
+            '<span class="habit-value">' + hourPeriod(bestHour) + '</span>' +
+          '</div>' +
+          '<div class="habit-item">' +
+            '<span class="habit-label">平均学习时长</span>' +
+            '<span class="habit-value">' + avgDuration + '分钟</span>' +
+          '</div>' +
+          '<div class="habit-item">' +
+            '<span class="habit-label">最佳专注时间</span>' +
+            '<span class="habit-value">' + hourRange(bestHour) + '</span>' +
+          '</div>' +
+          '<div class="habit-item">' +
+            '<span class="habit-label">学习频率</span>' +
+            '<span class="habit-value">' + pct(freq) + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderResourcePreference(insights) {
+    var pref = insights.preferences || {};
+    var data = pref.data || {};
+    var rp = data.resource_preference || {};
+    var conf = data.resource_confidence || 0;
+
+    if (conf <= 0) {
+      return (
+        '<div class="portrait-card">' +
+          '<div class="portrait-card-title">学习资源偏好</div>' +
+          '<div class="trend-sub">正在了解你的学习偏好...</div>' +
+        '</div>'
+      );
+    }
+
+    var modeLabels = {video: '视频学习', article: '文章阅读', documentation: '官方文档'};
+    var modeIcons = {video: '▶', article: '📄', documentation: '🌐'};
+    var effectiveMode = rp.effective_mode || 'article';
+    var modeLabel = modeLabels[effectiveMode] || effectiveMode;
+    var modeIcon = modeIcons[effectiveMode] || '📄';
+    var totalClicks = rp.total_clicks || 0;
+    var typeDist = rp.type_distribution || {};
+
+    // Calculate overall completion rate
+    var rates = rp.completion_rates || {};
+    var rateValues = Object.values(rates);
+    var avgRate = rateValues.length > 0 ? Math.round(rateValues.reduce(function(a,b){return a+b},0) / rateValues.length * 100) : 0;
+
+    // Build type ranking
+    var typeRanking = '';
+    var sorted = Object.entries(typeDist).sort(function(a,b){return b[1]-a[1]});
+    sorted.forEach(function(entry) {
+      var t = entry[0], cnt = entry[1];
+      var label = modeLabels[t] || t;
+      var icon = modeIcons[t] || '📄';
+      var pct = totalClicks > 0 ? Math.round(cnt / totalClicks * 100) : 0;
+      typeRanking += '<div class="pref-item"><span class="pref-label">' + icon + ' ' + label + '</span><span class="pref-value">' + pct + '%</span></div>';
+    });
+
+    return (
+      '<div class="portrait-card">' +
+        confidenceBanner(conf) +
+        '<div class="portrait-card-title">学习资源偏好</div>' +
+        '<div class="pref-grid">' +
+          '<div class="pref-item">' +
+            '<span class="pref-label">最有效学习方式</span>' +
+            '<span class="pref-value">' + modeIcon + ' ' + modeLabel + '</span>' +
+          '</div>' +
+          typeRanking +
+          '<div class="pref-item">' +
+            '<span class="pref-label">资源完成率</span>' +
+            '<span class="pref-value">' + avgRate + '%</span>' +
+          '</div>' +
+          '<div class="pref-item">' +
+            '<span class="pref-label">资源点击数</span>' +
+            '<span class="pref-value">' + totalClicks + '</span>' +
+          '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderPace(insights) {
+    var gp = insights.growth_profile || {};
+    var data = gp.data || {};
+    var conf = gp.confidence || 0;
+
+    var pace = data.recommended_pace || '--';
+
+    return (
+      '<div class="portrait-card">' +
+        confidenceBanner(conf) +
+        '<div class="portrait-card-title">推荐节奏</div>' +
+        '<div class="pace-value">' + pace + '</div>' +
+      '</div>'
+    );
+  }
+
+  function renderProbability(insights) {
+    var gp = insights.growth_profile || {};
+    var data = gp.data || {};
+    var conf = gp.confidence || 0;
+
+    var prob = data.completion_probability || '暂无数据';
+    var rate = data.average_completion_rate || 0;
+
+    // Map text probability to percentage for display
+    var probPct = '';
+    var probLabel = prob;
+    if (prob === '很高') { probPct = '85%'; probLabel = '很高'; }
+    else if (prob === '较高') { probPct = '65%'; probLabel = '较高'; }
+    else if (prob === '一般') { probPct = '45%'; probLabel = '一般'; }
+    else if (prob === '较低') { probPct = '25%'; probLabel = '较低'; }
+    else if (prob === '暂无数据') { probPct = '--'; probLabel = '暂无数据'; }
+
+    return (
+      '<div class="portrait-card">' +
+        confidenceBanner(conf) +
+        '<div class="portrait-card-title">完成概率</div>' +
+        '<div class="prob-ring">' +
+          '<div class="prob-pct">' + probPct + '</div>' +
+          '<div class="prob-label">' + probLabel + '</div>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function fetchAdjustments() {
+    fetch('/api/goals/' + goalId + '/adjustments')
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data.ok) {
+          var card = document.getElementById('ai-strategy-card');
+          if (card) card.innerHTML = renderStrategy(data.adjustments);
+        }
+      })
+      .catch(function() {});
+  }
+
+  function renderStrategy(adj) {
+    var modeText = '稳步推进';
+    var modeIcon = '';
+    if (adj.challenge_mode) { modeText = '挑战提升'; modeIcon = ' 🔥'; }
+    else if (adj.review_mode) { modeText = '巩固复习'; modeIcon = ' 📖'; }
+    else if (adj.task_multiplier < 1) { modeText = '轻松模式'; modeIcon = ' ☕'; }
+
+    var diffText = {easy: '简单', normal: '普通', hard: '困难'};
+    var diffLabel = diffText[adj.difficulty] || '普通';
+    var volumePct = Math.round(adj.task_multiplier * 100) + '%';
+
+    return (
+      '<div class="portrait-card">' +
+        '<div class="portrait-card-title">AI 当前策略</div>' +
+        '<div class="strategy-mode">' + modeText + modeIcon + '</div>' +
+        '<div class="strategy-grid">' +
+          '<div class="strategy-item">' +
+            '<span class="strategy-label">任务难度</span>' +
+            '<span class="strategy-value">' + diffLabel + '</span>' +
+          '</div>' +
+          '<div class="strategy-item">' +
+            '<span class="strategy-label">任务量</span>' +
+            '<span class="strategy-value">' + volumePct + '</span>' +
+          '</div>' +
+          '<div class="strategy-item">' +
+            '<span class="strategy-label">挑战模式</span>' +
+            '<span class="strategy-value">' + (adj.challenge_mode ? '开启' : '关闭') + '</span>' +
+          '</div>' +
+        '</div>' +
+        (adj.reason ? '<div class="strategy-reason">' + adj.reason + '</div>' : '') +
+      '</div>'
+    );
+  }
+
+  // ── Go ──
+  loadPortrait();
+})();
+</script>
+{% endif %}
+{% endblock %}

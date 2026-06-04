@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- AI Coach 提示 -->
+<div class="coach-tip">
+  <div class="coach-avatar">🤖</div>
+  <div class="coach-text">
+    <p class="coach-greeting">早上好！我是你的 AI 教练</p>
+    <p class="coach-message">今天也是成长的一天，让我们一起开始学习吧！</p>
+  </div>
+</div>
+
+<!-- 搜索框 -->
+<div class="search-box">
+  <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" stroke-width="2">
+    <circle cx="11" cy="11" r="8"/>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+  </svg>
+  <input type="text" class="search-input" placeholder="搜索技能..." readonly>
+</div>
+
+<!-- 推荐技能 -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">推荐技能</h2>
+  </div>
+  <div class="skill-grid">
+    {% for skill in skills %}
+    <a href="/wizard?skill={{ skill.id }}" class="skill-card">
+      <div class="skill-icon">{{ skill.icon }}</div>
+      <div class="skill-name">{{ skill.name }}</div>
+      <div class="skill-desc">{{ skill.description[:10] }}...</div>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+
+<!-- 当前成长目标 -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">当前成长目标</h2>
+  </div>
+  {% if goal %}
+  <a href="/roadmap" class="goal-card">
+    <div class="goal-card-left">
+      <span class="goal-icon">{{ goal.skill.icon }}</span>
+      <div class="goal-info">
+        <div class="goal-name">{{ goal.skill.name }}</div>
+        <div class="goal-meta">{{ goal.level }} · 每天{{ goal.daily_minutes }}分钟 · {{ goal.target_months }}个月</div>
+      </div>
+    </div>
+    <span class="goal-arrow">›</span>
+  </a>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">🎯</div>
+    <p class="empty-text">还没有成长目标</p>
+    <p class="empty-hint">选择一个技能，开始你的成长之旅</p>
+    <a href="/wizard" class="btn btn-primary">添加成长目标</a>
+  </div>
+  {% endif %}
+</section>
+
+<!-- 今日学习任务 -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">今日学习任务</h2>
+  </div>
+  {% if today_task %}
+    {% if today_task.status == 'pending' %}
+    <a href="/task/{{ today_task.id }}" class="task-card">
+      {% if adjustments and adjustments.reason %}
+      <div class="adjustment-banner">{{ adjustments.reason }}</div>
+      {% endif %}
+      <div class="task-card-header">
+        <span class="task-card-title">{{ today_task.title }}</span>
+        <span class="task-card-badge">{{ today_task.estimated_minutes }} 分钟</span>
+      </div>
+      <p class="task-card-desc">{{ today_task.content[:60] }}...</p>
+      <span class="btn btn-primary task-card-btn">查看详情</span>
+    </a>
+    {% set task_resources = today_task.resources|parse_json %}
+    {% if task_resources %}
+    <div class="task-resources">
+      <div class="task-resources-title">推荐学习资源</div>
+      {% for res in task_resources %}
+      <a href="{{ res.url }}" target="_blank" rel="noopener" class="task-resource-item"
+         onclick="recordResourceClick({{ today_task.id }}, '{{ res.url }}', '{{ res.title|e }}', '{{ res.type }}', {{ res.score|default(0) }}, {{ loop.index }})">
+        <span class="task-resource-icon">
+          {% if res.type == 'video' %}▶{% elif res.type == 'documentation' %}🌐{% else %}📄{% endif %}
+        </span>
+        <span class="task-resource-name">{{ res.title }}</span>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% elif today_task.status == 'done' %}
+    <div class="task-completed">
+      <span class="task-completed-icon">✅</span>
+      <p class="task-completed-text">今日任务已完成</p>
+    </div>
+    {% elif today_task.status == 'skipped' %}
+    <div class="task-completed">
+      <p class="task-completed-text">今日任务已跳过</p>
+      <a href="/task/{{ today_task.id }}" class="btn btn-outline" style="margin-top:10px">查看详情</a>
+    </div>
+    {% endif %}
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <p class="empty-text">今天还没有学习任务</p>
+    <p class="empty-hint">设定成长目标后，AI 将为你生成每日任务</p>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function() {
+  var h = new Date().getHours();
+  var greeting;
+  if (h < 6) greeting = '夜深了，还在学习吗？';
+  else if (h < 9) greeting = '早上好！';
+  else if (h < 12) greeting = '上午好！';
+  else if (h < 14) greeting = '中午好！';
+  else if (h < 18) greeting = '下午好！';
+  else greeting = '晚上好！';
+  var el = document.querySelector('.coach-greeting');
+  if (el) el.textContent = '我是你的 AI 教练，' + greeting;
+})();
+
+function recordResourceClick(taskId, url, title, type, score, position) {
+  fetch('/api/resources/click', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({task_id: taskId, url: url, title: title, type: type, score: score || 0, position: position || 0})
+  }).catch(function() {});
+}
+</script>
+{% endblock %}

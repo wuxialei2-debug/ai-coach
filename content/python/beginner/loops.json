@@ -1,0 +1,29 @@
+{
+  "id": "loops",
+  "title": "Python 循环语句",
+  "estimated_minutes": 15,
+  "summary": "for 循环遍历序列，while 循环在条件为 True 时反复执行。",
+  "content": [
+    "for 循环依次取出序列中的每个元素。range(n) 生成 0 到 n-1 的数字序列，常用于控制循环次数。",
+    "while 循环在条件为 True 时反复执行代码块，要确保条件最终变为 False 否则会死循环。",
+    "break 立即退出整个循环，continue 跳过当前轮次直接进入下一次。两个关键字在 for 和 while 中都可以使用。"
+  ],
+  "examples": [
+    {
+      "title": "for 循环与 range",
+      "code": "for i in range(1, 6):\n    print(f\"第 {i} 次\")\n\ntotal = 0\nfor n in range(1, 101):\n    total += n\nprint(f\"1到100的和 = {total}\")",
+      "output": "第 1 次\n第 2 次\n第 3 次\n第 4 次\n第 5 次\n1到100的和 = 5050"
+    }
+  ],
+  "practice": [
+    "用 for 循环打印九九乘法表",
+    "用 while 循环累加，到总和超过 1000 时停止，打印累加了多少个数"
+  ],
+  "quiz": [
+    {
+      "question": "range(5) 生成哪些数字？",
+      "answer": "0, 1, 2, 3, 4（不含5）"
+    }
+  ],
+  "next": "functions"
+}

@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% if goal %}
+<!-- Goal Header -->
+<div class="roadmap-header">
+  <div class="roadmap-header-top">
+    <span class="roadmap-skill-icon">{{ goal.skill.icon }}</span>
+    <div class="roadmap-skill-info">
+      <h2 class="roadmap-skill-name">{{ goal.skill.name }}</h2>
+      <div class="roadmap-meta">
+        <span class="meta-tag">{{ goal.level }}</span>
+        <span class="meta-tag">{{ goal.target_months }} 个月</span>
+        <span class="meta-tag">每天 {{ goal.daily_minutes }} 分钟</span>
+      </div>
+    </div>
+  </div>
+  <!-- Overall progress -->
+  {% set completed = stages|selectattr('status', 'equalto', 'completed')|list|length %}
+  {% set total = stages|length %}
+  {% set pct = (completed / total * 100)|int if total > 0 else 0 %}
+  <div class="roadmap-progress">
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:{{ pct }}%"></div>
+    </div>
+    <span class="progress-text">{{ completed }}/{{ total }} 阶段 | {{ pct }}%</span>
+  </div>
+</div>
+
+<!-- Stage List -->
+<div class="stage-list">
+  {% for stage in stages %}
+  <div class="stage-card stage-{{ stage.status }}" onclick="alert('功能开发中，敬请期待')">
+    <div class="stage-header">
+      <div class="stage-status-icon">
+        {% if stage.status == 'completed' %}
+        <svg viewBox="0 0 24 24" fill="#10B981" width="22" height="22">
+          <circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5" stroke="#fff" stroke-width="2" fill="none"/>
+        </svg>
+        {% elif stage.status == 'current' %}
+        <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+          <circle cx="12" cy="12" r="10" stroke="#4F46E5" stroke-width="2"/>
+          <circle cx="12" cy="12" r="5" fill="#4F46E5"/>
+        </svg>
+        {% else %}
+        <svg viewBox="0 0 24 24" fill="none" width="22" height="22">
+          <circle cx="12" cy="12" r="10" stroke="#D1D5DB" stroke-width="2"/>
+        </svg>
+        {% endif %}
+      </div>
+      <div class="stage-info">
+        <div class="stage-name">阶段{{ stage.stage_order }}：{{ stage.name }}</div>
+        <div class="stage-desc">{{ stage.description }}</div>
+      </div>
+    </div>
+
+    {% if stage.status == 'current' %}
+    <!-- Knowledge points -->
+    <div class="kp-section">
+      <div class="kp-header">
+        <span class="kp-title">知识点</span>
+        {% set done = stage.kp_list|selectattr('done')|list|length if stage.kp_list and stage.kp_list[0] is mapping else 0 %}
+        {% set total_kp = stage.kp_list|length %}
+        {% set kp_pct = (done / total_kp * 100)|int if total_kp > 0 else 0 %}
+        <span class="kp-count">{{ done }}/{{ total_kp }}</span>
+      </div>
+      {% if stage.kp_list and stage.kp_list[0] is not mapping %}
+      <ul class="kp-list">
+        {% for kp in stage.kp_list %}
+        <li class="kp-item">
+          <span class="kp-check">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D1D5DB" stroke-width="2">
+              <circle cx="12" cy="12" r="8"/>
+            </svg>
+          </span>
+          <span class="kp-name">{{ kp }}</span>
+        </li>
+        {% endfor %}
+      </ul>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<!-- Empty State -->
+<div class="empty-state" style="margin-top:40px">
+  <div class="empty-icon">🎯</div>
+  <p class="empty-text">还没有成长路线图</p>
+  <p class="empty-hint">选择一个技能，AI 将为你生成专属学习路线</p>
+  <a href="/wizard" class="btn btn-primary">添加技能目标</a>
+</div>
+{% endif %}
+{% endblock %}

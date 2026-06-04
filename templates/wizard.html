@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="wizard">
+  <!-- Step Progress -->
+  <div class="wizard-progress">
+    <div class="progress-dots">
+      <span class="dot active" data-step="1">1</span>
+      <span class="dot" data-step="2">2</span>
+      <span class="dot" data-step="3">3</span>
+      <span class="dot" data-step="4">4</span>
+      <span class="dot" data-step="5">5</span>
+    </div>
+    <div class="progress-labels">
+      <span class="label active" data-step="1">技能</span>
+      <span class="label" data-step="2">水平</span>
+      <span class="label" data-step="3">周期</span>
+      <span class="label" data-step="4">时长</span>
+      <span class="label" data-step="5">生成</span>
+    </div>
+  </div>
+
+  <form id="wizard-form">
+    <!-- Step 1: Select Skill -->
+    <div class="wizard-step active" data-step="1">
+      <h2 class="wizard-question">你想学习什么技能？</h2>
+      <div class="wizard-options">
+        {% for skill in skills %}
+        <div class="option-card" data-value="{{ skill.id }}" data-name="{{ skill.name }}">
+          <div class="option-icon">{{ skill.icon }}</div>
+          <div class="option-name">{{ skill.name }}</div>
+          <div class="option-desc">{{ skill.description[:20] }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- Step 2: Select Level -->
+    <div class="wizard-step" data-step="2">
+      <h2 class="wizard-question">你当前的<span class="hl-skill">Python</span>水平是？</h2>
+      <div class="wizard-options cols-2">
+        <div class="option-card" data-value="零基础">
+          <div class="option-icon">🌱</div>
+          <div class="option-name">零基础</div>
+          <div class="option-desc">从未接触过</div>
+        </div>
+        <div class="option-card" data-value="初级">
+          <div class="option-icon">📗</div>
+          <div class="option-name">初级</div>
+          <div class="option-desc">了解基本概念</div>
+        </div>
+        <div class="option-card" data-value="中级">
+          <div class="option-icon">📘</div>
+          <div class="option-name">中级</div>
+          <div class="option-desc">能独立完成简单任务</div>
+        </div>
+        <div class="option-card" data-value="高级">
+          <div class="option-icon">📕</div>
+          <div class="option-name">高级</div>
+          <div class="option-desc">经验丰富</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 3: Select Duration -->
+    <div class="wizard-step" data-step="3">
+      <h2 class="wizard-question">你希望多长时间达成目标？</h2>
+      <div class="wizard-options cols-2">
+        <div class="option-card" data-value="1">
+          <div class="option-icon">⚡</div>
+          <div class="option-name">1 个月</div>
+          <div class="option-desc">快速突击</div>
+        </div>
+        <div class="option-card" data-value="3">
+          <div class="option-icon">🔥</div>
+          <div class="option-name">3 个月</div>
+          <div class="option-desc">标准周期</div>
+        </div>
+        <div class="option-card" data-value="6">
+          <div class="option-icon">🌿</div>
+          <div class="option-name">6 个月</div>
+          <div class="option-desc">稳步提升</div>
+        </div>
+        <div class="option-card" data-value="12">
+          <div class="option-icon">🌳</div>
+          <div class="option-name">1 年</div>
+          <div class="option-desc">长期深耕</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 4: Select Daily Time -->
+    <div class="wizard-step" data-step="4">
+      <h2 class="wizard-question">你每天可以投入多少时间？</h2>
+      <div class="wizard-options cols-2">
+        <div class="option-card" data-value="15">
+          <div class="option-icon">☕</div>
+          <div class="option-name">15 分钟</div>
+          <div class="option-desc">碎片时间</div>
+        </div>
+        <div class="option-card" data-value="30">
+          <div class="option-icon">📖</div>
+          <div class="option-name">30 分钟</div>
+          <div class="option-desc">轻松坚持</div>
+        </div>
+        <div class="option-card" data-value="60">
+          <div class="option-icon">💪</div>
+          <div class="option-name">1 小时</div>
+          <div class="option-desc">专注学习</div>
+        </div>
+        <div class="option-card" data-value="120">
+          <div class="option-icon">🚀</div>
+          <div class="option-name">2 小时</div>
+          <div class="option-desc">深度学习</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Step 5: Generating -->
+    <div class="wizard-step" data-step="5">
+      <div class="wizard-generating">
+        <div class="gen-spinner"></div>
+        <h2 class="gen-title">AI 正在为你生成路线图</h2>
+        <p class="gen-sub">正在分析你的学习需求...</p>
+        <ul class="gen-steps">
+          <li id="gen-1">评估当前水平 ✓</li>
+          <li id="gen-2">制定学习阶段...</li>
+          <li id="gen-3">规划知识点...</li>
+          <li id="gen-4">生成路线图...</li>
+        </ul>
+      </div>
+    </div>
+  </form>
+
+  <!-- Navigation Buttons -->
+  <div class="wizard-nav">
+    <button type="button" class="btn btn-outline" id="wizard-back" style="visibility:hidden">上一步</button>
+    <button type="button" class="btn btn-primary" id="wizard-next">下一步</button>
+  </div>
+</div>
+{% endblock %}

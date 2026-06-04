@@ -1,0 +1,33 @@
+{
+  "id": "variables",
+  "title": "Python 变量",
+  "estimated_minutes": 15,
+  "summary": "变量是存储数据的容器，Python 不需要声明类型。",
+  "content": [
+    "变量是存储数据的容器。在 Python 中，使用 = 给变量赋值，不需要提前声明变量类型。",
+    "Python 是动态类型语言，同一个变量可以先后指向不同类型的数据。变量名推荐使用小写字母和下划线，如 student_name。",
+    "type() 函数可以查看变量的类型。Python 常用的基本类型有：int（整数）、float（浮点数）、str（字符串）、bool（布尔值）。"
+  ],
+  "examples": [
+    {
+      "title": "创建和使用变量",
+      "code": "name = \"Tom\"\nage = 18\nheight = 1.75\nis_student = True\n\nprint(type(name))   # <class 'str'>\nprint(type(age))    # <class 'int'>\nprint(type(height)) # <class 'float'>",
+      "output": "<class 'str'>\n<class 'int'>\n<class 'float'>"
+    }
+  ],
+  "practice": [
+    "创建一个整数变量、一个浮点变量、一个字符串变量，并打印它们的值和类型",
+    "用 input() 获取用户输入的年龄，转换为整数，然后打印 10 年后的年龄"
+  ],
+  "quiz": [
+    {
+      "question": "Python 使用什么符号给变量赋值？",
+      "answer": "="
+    },
+    {
+      "question": "type(3.14) 的结果是什么？",
+      "answer": "<class 'float'>"
+    }
+  ],
+  "next": "data_types"
+}

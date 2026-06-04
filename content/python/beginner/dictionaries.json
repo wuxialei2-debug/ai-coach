@@ -1,0 +1,29 @@
+{
+  "id": "dictionaries",
+  "title": "Python 字典",
+  "estimated_minutes": 15,
+  "summary": "字典用 {} 创建，存储键值对，用键访问值，查找速度极快。",
+  "content": [
+    "字典是 Python 的映射类型，用花括号 {} 创建，每个元素是键值对 key: value。键必须是不可变类型（字符串、数字、元组）。",
+    "用键访问值：d[key]，键不存在会报错。推荐用 d.get(key, default) 避免报错。字典是可变的，可以添加、修改、删除键值对。",
+    "集合用 set() 创建（{} 是空字典！），元素唯一且无序，常用于去重和集合运算（交集 &、并集 |、差集 -）。"
+  ],
+  "examples": [
+    {
+      "title": "字典操作",
+      "code": "student = {\"name\": \"小明\", \"age\": 18, \"score\": 95}\nprint(student[\"name\"])              # 小明\nprint(student.get(\"grade\", \"未设置\")) # 未设置\n\nstudent[\"age\"] = 19\nstudent[\"grade\"] = \"高三\"\nprint(student)",
+      "output": "小明\n未设置\n{'name': '小明', 'age': 19, 'score': 95, 'grade': '高三'}"
+    }
+  ],
+  "practice": [
+    "创建字典存储 3 个学生的姓名和成绩，打印平均分",
+    "输入一行文字，用字典统计每个字符出现的次数"
+  ],
+  "quiz": [
+    {
+      "question": "创建空集合用什么？",
+      "answer": "set()（注意 {} 创建的是空字典）"
+    }
+  ],
+  "next": null
+}

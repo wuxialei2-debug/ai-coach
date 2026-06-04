@@ -1,0 +1,29 @@
+{
+  "id": "if_else",
+  "title": "Python 条件判断",
+  "estimated_minutes": 15,
+  "summary": "if/elif/else 根据条件执行不同代码，Python 用缩进组织代码块。",
+  "content": [
+    "条件判断让程序根据不同情况做出不同反应。if 检查条件为 True 时执行缩进代码块；elif 检查其他条件；else 兜底处理。",
+    "比较运算符：==（等于）、!=（不等于）、>（大于）、<（小于）、>=（大于等于）、<=（小于等于）。逻辑运算符：and、or、not。",
+    "Python 用缩进（4 个空格）组织代码块，同一代码块缩进必须一致。if 语句末尾必须有冒号。"
+  ],
+  "examples": [
+    {
+      "title": "成绩等级判断",
+      "code": "score = 85\nif score >= 90:\n    print(\"优秀\")\nelif score >= 80:\n    print(\"良好\")\nelif score >= 60:\n    print(\"及格\")\nelse:\n    print(\"不及格\")",
+      "output": "良好"
+    }
+  ],
+  "practice": [
+    "输入一个整数，判断它是正数、负数还是零",
+    "输入年份，判断是否为闰年"
+  ],
+  "quiz": [
+    {
+      "question": "if 语句末尾必须有什么符号？",
+      "answer": "冒号（:）"
+    }
+  ],
+  "next": "loops"
+}

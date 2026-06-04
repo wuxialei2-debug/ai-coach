@@ -1,0 +1,29 @@
+{
+  "id": "functions",
+  "title": "Python 函数",
+  "estimated_minutes": 15,
+  "summary": "def 定义函数，参数是输入，return 是输出。",
+  "content": [
+    "函数是可复用的代码块，用 def 关键字定义。给函数起描述性名字，通过函数名反复调用。",
+    "参数是函数的输入，定义时写在括号里的是形参，调用时传入的是实参。函数可以有多个参数用逗号分隔，还支持默认参数值。",
+    "return 让函数返回结果给调用者。没有 return 的函数返回 None。"
+  ],
+  "examples": [
+    {
+      "title": "定义和调用函数",
+      "code": "def greet(name, greeting=\"你好\"):\n    return f\"{greeting}，{name}！\"\n\nprint(greet(\"小明\"))\nprint(greet(\"小红\", \"早上好\"))\n\ndef add(a, b):\n    return a + b\n\nprint(f\"3 + 5 = {add(3, 5)}\")",
+      "output": "你好，小明！\n早上好，小红！\n3 + 5 = 8"
+    }
+  ],
+  "practice": [
+    "编写 is_even(n) 函数判断一个数是否为偶数",
+    "编写 max_of_three(a, b, c) 函数返回三个数中的最大值"
+  ],
+  "quiz": [
+    {
+      "question": "定义函数使用什么关键字？",
+      "answer": "def"
+    }
+  ],
+  "next": "lists"
+}

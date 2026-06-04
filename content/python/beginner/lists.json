@@ -1,0 +1,29 @@
+{
+  "id": "lists",
+  "title": "Python 列表",
+  "estimated_minutes": 15,
+  "summary": "列表用 [] 创建，是可变的有序序列，索引从 0 开始。",
+  "content": [
+    "列表是 Python 最常用的数据结构，用方括号 [] 创建。元素可以是任何类型，列表是可变的，可以随时添加、删除或修改元素。",
+    "用索引访问元素，第一个是 0，最后一个用 -1。切片 [start:end] 获取子列表，不包含 end 位置。",
+    "常用方法：append() 末尾添加，insert() 指定位置插入，pop() 删除并返回，sort() 排序，len() 获取长度。"
+  ],
+  "examples": [
+    {
+      "title": "列表基本操作",
+      "code": "fruits = [\"苹果\", \"香蕉\", \"橙子\"]\nprint(fruits[0])    # 苹果\nprint(fruits[-1])   # 橙子\n\nfruits.append(\"葡萄\")\nprint(fruits)       # ['苹果', '香蕉', '橙子', '葡萄']\n\nfruits.remove(\"香蕉\")\nprint(len(fruits))  # 3",
+      "output": "苹果\n橙子\n['苹果', '香蕉', '橙子', '葡萄']\n3"
+    }
+  ],
+  "practice": [
+    "创建一个包含 5 个数字的列表，打印最大值、最小值和总和",
+    "输入一行文字，用空格分割成列表，然后反序打印"
+  ],
+  "quiz": [
+    {
+      "question": "列表索引从几开始？",
+      "answer": "0"
+    }
+  ],
+  "next": "dictionaries"
+}

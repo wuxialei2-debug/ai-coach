@@ -1,0 +1,225 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="task-detail">
+  <!-- Header -->
+  <div class="td-header">
+    <h2 class="td-title">{{ task.title }}</h2>
+    <span class="td-badge">{{ task.estimated_minutes }} 分钟</span>
+  </div>
+
+  {% if task.status == 'done' %}
+  <div class="td-status td-status-done">✅ 已完成</div>
+  {% elif task.status == 'skipped' %}
+  <div class="td-status td-status-skipped">⏭️ 已跳过</div>
+  {% endif %}
+
+  <!-- Learning Content -->
+  <div class="td-section">
+    <h3 class="td-section-title">📖 学习内容</h3>
+    {% for block in task.content|parse_content_blocks %}
+      {% if block.type == 'review' %}
+        <div class="content-review">{{ block.text }}</div>
+      {% elif block.type == 'rich' %}
+        {% if block.data.summary %}
+        <div class="lesson-summary">{{ block.data.summary }}</div>
+        {% endif %}
+        {% if block.data.content %}
+        <div class="lesson-body">
+          {% for p in block.data.content %}
+          <p class="lesson-para">{{ p }}</p>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% if block.data.examples %}
+        {% for ex in block.data.examples %}
+        <div class="lesson-example">
+          <div class="example-title">{{ ex.title }}</div>
+          <pre class="example-code"><code>{{ ex.code }}</code></pre>
+          {% if ex.output %}
+          <div class="example-output">
+            <span class="output-label">输出：</span>{{ ex.output }}
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% if block.data.tips %}
+        <div class="lesson-tips">
+          <div class="tips-icon">💡</div>
+          <div class="tips-list">
+            {% for tip in block.data.tips %}
+            <p class="tip-item">{{ tip }}</p>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        {% if block.data.mistakes %}
+        <div class="lesson-mistakes">
+          <div class="mistakes-icon">⚠️</div>
+          <div class="mistakes-list">
+            {% for m in block.data.mistakes %}
+            <p class="mistake-item">{{ m }}</p>
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+      {% else %}
+        <p class="td-text">{{ block.text }}</p>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Practice -->
+  <div class="td-section">
+    <h3 class="td-section-title">✍️ 练习任务</h3>
+    {% for block in task.practice|parse_practice_blocks %}
+      {% if block.type == 'exercises' %}
+      <ol class="exercise-list">
+        {% for ex in block['items'] %}
+        <li class="exercise-item">{{ ex }}</li>
+        {% endfor %}
+      </ol>
+      {% elif block.type == 'challenge' %}
+      <div class="content-challenge">{{ block.text }}</div>
+      {% else %}
+      <p class="td-text">{{ block.text }}</p>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Quiz -->
+  {% set quiz_items = task.content|extract_quiz %}
+  {% if quiz_items %}
+  <div class="td-section">
+    <h3 class="td-section-title">🧠 小测验</h3>
+    <div class="quiz-list">
+      {% for q in quiz_items %}
+      <div class="quiz-item">
+        <div class="quiz-question">Q{{ loop.index }}: {{ q.question }}</div>
+        <div class="quiz-answer" onclick="this.classList.toggle('revealed')">
+          <span class="quiz-answer-label">点击查看答案</span>
+          <span class="quiz-answer-text">{{ q.answer }}</span>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Feedback Form (only for pending tasks) -->
+  {% if task.status == 'pending' %}
+  <div class="td-section td-feedback">
+    <h3 class="td-section-title">💬 完成反馈</h3>
+
+    <form id="feedback-form">
+      <input type="hidden" name="action" id="fb-action" value="">
+
+      <div class="fb-buttons">
+        <button type="button" class="fb-btn" data-action="done">
+          <span class="fb-icon">✅</span>
+          <span class="fb-label">完成了</span>
+        </button>
+        <button type="button" class="fb-btn" data-action="too_hard">
+          <span class="fb-icon">😅</span>
+          <span class="fb-label">有点难</span>
+        </button>
+        <button type="button" class="fb-btn" data-action="too_easy">
+          <span class="fb-icon">😴</span>
+          <span class="fb-label">太简单</span>
+        </button>
+        <button type="button" class="fb-btn" data-action="skipped">
+          <span class="fb-icon">❌</span>
+          <span class="fb-label">今天没完成</span>
+        </button>
+      </div>
+
+      <div class="fb-optional">
+        <textarea name="notes" class="fb-textarea" placeholder="学习笔记（可选）" rows="3"></textarea>
+        <input type="number" name="actual_minutes" class="fb-input" placeholder="实际学习分钟（可选）" min="1">
+      </div>
+
+      <button type="submit" class="btn btn-primary fb-submit" disabled>提交反馈</button>
+    </form>
+  </div>
+  {% endif %}
+
+  <!-- Feedback Result (for completed tasks) -->
+  {% if feedback %}
+  <div class="td-section td-result">
+    <h3 class="td-section-title">📝 反馈记录</h3>
+    {% if feedback.difficulty == 'too_hard' %}
+    <p class="td-text">难度反馈：有点难</p>
+    {% elif feedback.difficulty == 'too_easy' %}
+    <p class="td-text">难度反馈：太简单</p>
+    {% elif feedback.difficulty == 'just_right' %}
+    <p class="td-text">难度反馈：刚好合适</p>
+    {% endif %}
+    {% if feedback.completed_minutes %}
+    <p class="td-text">实际学习：{{ feedback.completed_minutes }} 分钟</p>
+    {% endif %}
+    {% if feedback.note %}
+    <p class="td-text">笔记：{{ feedback.note }}</p>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Back link -->
+  <a href="/" class="btn btn-outline td-back">← 返回首页</a>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('feedback-form');
+  if (!form) return;
+
+  const actionInput = document.getElementById('fb-action');
+  const submitBtn = form.querySelector('.fb-submit');
+  const btns = form.querySelectorAll('.fb-btn');
+
+  btns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      btns.forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      actionInput.value = btn.dataset.action;
+      submitBtn.disabled = false;
+    });
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const action = actionInput.value;
+    if (!action) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = '提交中...';
+
+    try {
+      const resp = await fetch('/api/tasks/{{ task.id }}/feedback', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: action,
+          notes: form.querySelector('[name="notes"]').value,
+          actual_minutes: form.querySelector('[name="actual_minutes"]').value
+            ? parseInt(form.querySelector('[name="actual_minutes"]').value) : null,
+        }),
+      });
+
+      const data = await resp.json();
+      if (data.ok) {
+        window.location.reload();
+      } else {
+        submitBtn.textContent = '提交失败，请重试';
+        submitBtn.disabled = false;
+      }
+    } catch (err) {
+      submitBtn.textContent = '网络错误，请重试';
+      submitBtn.disabled = false;
+    }
+  });
+});
+</script>
+{% endblock %}

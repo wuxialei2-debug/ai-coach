@@ -1,0 +1,29 @@
+{
+  "id": "data_types",
+  "title": "Python 数据类型",
+  "estimated_minutes": 15,
+  "summary": "Python 有四种基本数据类型：int、float、str、bool。",
+  "content": [
+    "Python 的四种基本数据类型：int（整数）用于没有小数的数字，float（浮点数）用于带小数的数字，str（字符串）用于文本，bool（布尔值）只有 True 和 False。",
+    "可以用 int()、float()、str() 进行类型转换。例如 int('18') 将字符串转为整数，str(100) 将数字转为字符串。",
+    "可以用 isinstance() 判断变量类型：isinstance(3.14, float) 返回 True。"
+  ],
+  "examples": [
+    {
+      "title": "类型转换",
+      "code": "s = \"100\"\nn = int(s) + 50\nprint(n)         # 150\n\nx = 3.14\nprint(int(x))    # 3\nprint(str(x))    # \"3.14\"",
+      "output": "150\n3\n3.14"
+    }
+  ],
+  "practice": [
+    "将字符串 \"3.14\" 转换为浮点数，再转回字符串，打印每一步的类型",
+    "用 isinstance() 检查变量是否为整数类型"
+  ],
+  "quiz": [
+    {
+      "question": "int(\"50\") 的结果是什么？",
+      "answer": "50（整数）"
+    }
+  ],
+  "next": "input_output"
+}

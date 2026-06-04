@@ -1,0 +1,29 @@
+{
+  "id": "input_output",
+  "title": "Python 输入与输出",
+  "estimated_minutes": 15,
+  "summary": "print() 输出信息，input() 获取用户输入，f-string 格式化。",
+  "content": [
+    "print() 是最基本的输出函数，可以打印字符串、数字、变量，多个值用逗号分隔。print() 会自动换行。",
+    "input() 暂停程序等待用户输入，返回值始终是字符串。需要数字时用 int() 或 float() 转换。",
+    "f-string 是 Python 3.6 引入的格式化语法，用 f\"...\" 创建，花括号中写变量名或表达式。"
+  ],
+  "examples": [
+    {
+      "title": "基本输入输出",
+      "code": "name = input(\"请输入名字：\")\nage = input(\"请输入年龄：\")\nprint(f\"你好，{name}！\")\nprint(f\"明年你就 {int(age)+1} 岁了\")",
+      "output": "请输入名字：小明\n请输入年龄：18\n你好，小明！\n明年你就 19 岁了"
+    }
+  ],
+  "practice": [
+    "编写程序让用户输入姓名和城市，打印一句问候语",
+    "输入两个数字，打印它们的和、差、积、商"
+  ],
+  "quiz": [
+    {
+      "question": "input() 的返回值是什么类型？",
+      "answer": "字符串（str）"
+    }
+  ],
+  "next": "if_else"
+}
