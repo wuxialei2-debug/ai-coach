@@ -133,6 +133,16 @@ def create_app():
         if active_goal:
             today_task = generate_daily_task(active_goal)
             adjustments = get_adjustments(active_goal.id)
+            # Refresh resources for existing tasks with empty resources
+            if today_task and not today_task.resources:
+                try:
+                    from engine.content.resources import get_resources
+                    kp_name = today_task.title.replace('理解', '').replace('学习', '')
+                    resources = get_resources(kp_name, active_goal.skill.name, active_goal.level)
+                    if resources:
+                        today_task.resources = json.dumps(resources, ensure_ascii=False)
+                except Exception:
+                    pass
 
         return render_template('index.html', goal=active_goal,
                                skills=skills, today_task=today_task,
@@ -176,6 +186,20 @@ def create_app():
     def task_detail(task_id):
         task = DailyTask.query.get_or_404(task_id)
         feedback = TaskFeedback.query.filter_by(task_id=task_id).first()
+
+        # If no resources stored, fetch fresh from Resource Engine
+        if not task.resources:
+            try:
+                goal = UserGoal.query.get(task.user_goal_id)
+                if goal:
+                    from engine.content.resources import get_resources
+                    kp_name = task.title.replace('理解', '').replace('学习', '')
+                    resources = get_resources(kp_name, goal.skill.name, goal.level)
+                    if resources:
+                        task.resources = json.dumps(resources, ensure_ascii=False)
+            except Exception:
+                pass
+
         return render_template('task_detail.html', task=task, feedback=feedback)
 
     @app.route('/kp/<int:goal_id>/<path:kp_name>')
