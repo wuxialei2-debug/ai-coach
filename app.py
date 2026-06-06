@@ -11,8 +11,21 @@ from engine.memory.engine import update as memory_update, get_insights as memory
 from engine.coach.adjuster import get_adjustments
 
 
+def _dedup_skills():
+    """Remove duplicate skills, keeping only the first instance of each name."""
+    from sqlalchemy import func
+    dups = db.session.query(Skill.name, func.count(Skill.id)).group_by(Skill.name).having(func.count(Skill.id) > 1).all()
+    for name, _ in dups:
+        instances = Skill.query.filter_by(name=name).order_by(Skill.id).all()
+        for dup in instances[1:]:
+            db.session.delete(dup)
+    if dups:
+        db.session.commit()
+        print(f'[Seed] Deduplicated {len(dups)} skill(s)')
+
+
 def _seed_skills():
-    """Seed predefined skills if table is empty."""
+    """Seed predefined skills if not already present (worker-safe)."""
     skills = [
         {'name': 'Python', 'description': '从零开始学习 Python 编程，掌握基础语法到项目实战', 'icon': '🐍', 'category': '编程'},
         {'name': '英语', 'description': '系统提升英语能力，从基础到流利表达', 'icon': '🌍', 'category': '语言'},
@@ -20,7 +33,9 @@ def _seed_skills():
         {'name': '写作', 'description': '提升写作能力，清晰表达思想与观点', 'icon': '✍️', 'category': '表达'},
     ]
     for s in skills:
-        db.session.add(Skill(**s))
+        existing = Skill.query.filter_by(name=s['name']).first()
+        if not existing:
+            db.session.add(Skill(**s))
     db.session.commit()
 
 
@@ -32,6 +47,8 @@ def create_app():
 
     with app.app_context():
         db.create_all()
+        # Deduplicate skills in case gunicorn workers double-seeded
+        _dedup_skills()
         # Auto-seed skills if table is empty
         if not Skill.query.first():
             _seed_skills()

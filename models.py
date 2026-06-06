@@ -8,7 +8,7 @@ class Skill(db.Model):
     __tablename__ = 'skills'
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50), nullable=False)
+    name = db.Column(db.String(50), nullable=False, unique=True)
     description = db.Column(db.Text)
     icon = db.Column(db.String(10))
     category = db.Column(db.String(20))
