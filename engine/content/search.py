@@ -64,7 +64,8 @@ def search_resources(skill_name, level, content_id, knowledge_point=''):
     Returns list of resource dicts with title, url, type, source, score.
     """
     provider = get_provider()
-    return provider.search(content_id, limit=5)
+    kp = knowledge_point or content_id
+    return provider.search(content_id, limit=5, knowledge_point=kp, skill_name=skill_name)
 
 
 def calculate_resource_score(resource, user_preference=None):

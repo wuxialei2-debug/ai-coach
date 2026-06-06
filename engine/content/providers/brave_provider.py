@@ -77,19 +77,21 @@ class BraveProvider(SearchProvider):
     def __init__(self):
         self.api_key = os.environ.get('BRAVE_API_KEY', '')
 
-    def search(self, query, limit=5):
+    def search(self, query, limit=5, knowledge_point=None, skill_name=None):
         """Search Brave for resources matching *query*.
 
         Args:
             query: content_id (e.g. "variables")
             limit: max results
+            knowledge_point: KP name for fallback
+            skill_name: skill name for context
 
         Returns:
             list of standardized resource dicts
         """
         if not self.api_key:
             print('[BraveProvider] API Key missing, fallback → StaticProvider')
-            return self._fallback_static(query, limit)
+            return self._fallback_static(query, limit, knowledge_point, skill_name)
 
         # Build search query
         search_query = self._build_query(query)
@@ -99,7 +101,7 @@ class BraveProvider(SearchProvider):
             raw_results = self._call_api(search_query, limit * 2)
         except Exception as e:
             print(f'[BraveProvider] Search failed: {e}, fallback → StaticProvider')
-            return self._fallback_static(query, limit)
+            return self._fallback_static(query, limit, knowledge_point, skill_name)
 
         # Normalize, classify, filter
         results = []
@@ -179,7 +181,7 @@ class BraveProvider(SearchProvider):
         return results
 
     @staticmethod
-    def _fallback_static(query, limit):
+    def _fallback_static(query, limit, knowledge_point=None, skill_name=None):
         """Fall back to StaticProvider."""
         from .static_provider import StaticProvider
-        return StaticProvider().search(query, limit)
+        return StaticProvider().search(query, limit, knowledge_point, skill_name)

@@ -30,6 +30,6 @@ MOCK_RESULTS = [
 class MockProvider(SearchProvider):
     """Return fixed mock data. For development and testing only."""
 
-    def search(self, query, limit=5):
+    def search(self, query, limit=5, knowledge_point=None, skill_name=None):
         """Return mock results regardless of query."""
         return MOCK_RESULTS[:limit]

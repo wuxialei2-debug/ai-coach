@@ -177,7 +177,7 @@ def get_resources(content_id, skill_name=None, level=None):
         return cached
 
     # 2. Search (currently static mapping, future: web search)
-    raw = search_resources(skill_name or '', level or '', content_id)
+    raw = search_resources(skill_name or '', level or '', content_id, knowledge_point=content_id)
 
     # 3. Rank and return top 5
     resources = rank_resources(raw)
