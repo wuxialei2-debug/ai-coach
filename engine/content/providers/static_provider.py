@@ -53,13 +53,12 @@ class StaticProvider(SearchProvider):
 
         fallback = []
 
-        # Baidu Baike — Chinese encyclopedia
         fallback.append({
-            'title': f'{knowledge_point} — 百度百科',
-            'url': f'https://baike.baidu.com/item/{encoded}',
-            'type': 'documentation',
-            'source': 'baike.baidu.com',
-            'score': 70,
+            'title': f'{knowledge_point} — 百度搜索',
+            'url': f'https://www.baidu.com/s?wd={encoded}',
+            'type': 'article',
+            'source': 'baidu.com',
+            'score': 65,
         })
 
         # Bilibili — Chinese video platform
