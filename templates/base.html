@@ -46,6 +46,15 @@
   </div>
 
   <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  <script>
+  function recordResourceClick(taskId, url, title, type, score, position) {
+    fetch('/api/resources/click', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({task_id: taskId, url: url, title: title, type: type, score: score || 0, position: position || 0})
+    }).catch(function() {});
+  }
+  </script>
   {% block scripts %}{% endblock %}
 </body>
 </html>

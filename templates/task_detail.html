@@ -107,6 +107,26 @@
   </div>
   {% endif %}
 
+  <!-- Recommended Resources (when available, especially for no-content skills) -->
+  {% set res_items = task.resources|parse_json %}
+  {% if res_items %}
+  <div class="td-section">
+    <h3 class="td-section-title">📚 推荐学习资源</h3>
+    {% for res in res_items %}
+    <a href="{{ res.url }}" target="_blank" rel="noopener" class="task-resource-item"
+       onclick="recordResourceClick({{ task.id }}, '{{ res.url }}', '{{ res.title|e }}', '{{ res.type }}', {{ res.score|default(0) }}, {{ loop.index }})">
+      <span class="task-resource-icon">
+        {% if res.type == 'video' %}▶{% elif res.type == 'documentation' %}🌐{% else %}📄{% endif %}
+      </span>
+      <div style="flex:1;min-width:0">
+        <div class="task-resource-name">{{ res.title }}</div>
+        <div style="font-size:11px;color:#9CA3AF">{{ res.source or '' }}</div>
+      </div>
+    </a>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <!-- Feedback Form (only for pending tasks) -->
   {% if task.status == 'pending' %}
   <div class="td-section td-feedback">

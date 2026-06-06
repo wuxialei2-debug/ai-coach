@@ -30,8 +30,9 @@
 <!-- Stage List -->
 <div class="stage-list">
   {% for stage in stages %}
-  <div class="stage-card stage-{{ stage.status }}" onclick="alert('功能开发中，敬请期待')">
-    <div class="stage-header">
+  <div class="stage-card stage-{{ stage.status }}">
+    <div class="stage-header" onclick="window.location.href='/'">
+      <div class="stage-status-icon">
       <div class="stage-status-icon">
         {% if stage.status == 'completed' %}
         <svg viewBox="0 0 24 24" fill="#10B981" width="22" height="22">
@@ -67,7 +68,7 @@
       {% if stage.kp_list and stage.kp_list[0] is not mapping %}
       <ul class="kp-list">
         {% for kp in stage.kp_list %}
-        <li class="kp-item">
+        <li class="kp-item" onclick="window.location.href='/kp/{{ goal.id }}/{{ kp | urlencode }}'">
           <span class="kp-check">
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#D1D5DB" stroke-width="2">
               <circle cx="12" cy="12" r="8"/>

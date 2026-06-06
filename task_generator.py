@@ -154,9 +154,13 @@ def generate_daily_task(goal):
         adjusted_minutes = max(5, int(goal.daily_minutes * multiplier))
 
     # Collect resources from content engine
+    # Use content_id if available, otherwise search by first KP name
     resources = []
-    if first_content_id:
-        resources = get_resources(first_content_id, skill_name, level)
+    search_key = first_content_id
+    if not search_key and kps:
+        search_key = kps[0]
+    if search_key:
+        resources = get_resources(search_key, skill_name, level)
 
     task = DailyTask(
         user_goal_id=goal.id,

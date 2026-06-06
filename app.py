@@ -178,6 +178,14 @@ def create_app():
         feedback = TaskFeedback.query.filter_by(task_id=task_id).first()
         return render_template('task_detail.html', task=task, feedback=feedback)
 
+    @app.route('/kp/<int:goal_id>/<path:kp_name>')
+    def kp_resources(goal_id, kp_name):
+        """Show resources for a specific knowledge point."""
+        goal = UserGoal.query.get_or_404(goal_id)
+        from engine.content.search import search_resources
+        resources = search_resources(goal.skill.name, goal.level, '', kp_name)
+        return render_template('kp_resources.html', goal=goal, kp_name=kp_name, resources=resources)
+
     # ── API Routes ─────────────────────────────────────────────────────────
 
     @app.route('/api/goals/create', methods=['POST'])

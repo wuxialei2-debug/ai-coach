@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block content %}
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">{{ goal.skill.icon }} {{ kp_name }}</h2>
+    <a href="/" class="section-more">返回首页</a>
+  </div>
+</section>
+
+<!-- Learning Step Suggestion -->
+<section class="section">
+  <div class="summary-card">
+    <div class="summary-header">推荐学习步骤</div>
+    <div class="summary-grid" style="padding:0;gap:8px">
+      <div class="summary-item">
+        <span class="summary-label">① 了解概念</span>
+        <span class="summary-value" style="font-size:12px;color:#6B7280">阅读文章或文档，建立基本认知</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">② 观看示例</span>
+        <span class="summary-value" style="font-size:12px;color:#6B7280">通过视频或教程学习实际操作</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">③ 动手练习</span>
+        <span class="summary-value" style="font-size:12px;color:#6B7280">按照练习任务进行实践</span>
+      </div>
+      <div class="summary-item">
+        <span class="summary-label">④ 完成反馈</span>
+        <span class="summary-value" style="font-size:12px;color:#6B7280">回到首页提交今天的学习反馈</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Recommended Resources -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">推荐学习资源</h2>
+  </div>
+
+  {% if not resources %}
+  <div class="empty-state">
+    <div class="empty-icon">📚</div>
+    <p class="empty-text">暂无推荐资源</p>
+    <p class="empty-hint">请先创建学习目标，系统将自动生成推荐资源</p>
+    <a href="/wizard" class="btn btn-primary">添加成长目标</a>
+  </div>
+  {% else %}
+    {% set types = {'documentation': '官方文档', 'video': '视频教程', 'article': '文章教程'} %}
+    {% set icons = {'documentation': '🌐', 'video': '▶', 'article': '📄'} %}
+
+    {% for rtype in ['documentation', 'video', 'article'] %}
+      {% set group = resources | selectattr('type', 'equalto', rtype) | list %}
+      {% if group %}
+      <div style="background:#FFFFFF;border:1.5px solid #F3F4F6;border-radius:10px;padding:14px;margin-bottom:10px">
+        <div style="font-size:13px;font-weight:600;color:#4B5563;margin-bottom:8px">{{ icons[rtype] }} {{ types[rtype] }}</div>
+        {% for res in group %}
+        <a href="{{ res.url }}" target="_blank" rel="noopener"
+           style="display:block;padding:8px 0;border-bottom:1px solid #F3F4F6;font-size:13px;color:#4F46E5;font-weight:500"
+           onclick="recordResourceClick(0, '{{ res.url }}', '{{ res.title|e }}', '{{ res.type }}', {{ res.score|default(0) }}, {{ loop.index }})">
+          {{ res.title }}
+        </a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    {% endfor %}
+  {% endif %}
+</section>
+
+<section class="section">
+  <a href="/" class="btn btn-primary" style="width:100%;text-align:center">回到首页开始学习</a>
+</section>
+{% endblock %}
